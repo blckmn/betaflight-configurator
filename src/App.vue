@@ -158,6 +158,9 @@
                                     i18n_title="tabPreflight"
                                 ></a>
                             </li>
+                            <li class="tab_autotune">
+                                <a href="#" i18n="tabAutotune" class="tabicon ic_pid" i18n_title="tabAutotune"></a>
+                            </li>
                         </ul>
                         <ul class="mode-connected">
                             <li class="tab_setup">
