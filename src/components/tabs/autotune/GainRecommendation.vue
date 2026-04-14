@@ -1,76 +1,69 @@
 <template>
-    <div class="gui_box gain-recommendation">
-        <div class="gui_box_titlebar">
-            <div class="spacer_box_title" v-html="$t('autotuneGainTitle')"></div>
-        </div>
-        <div class="spacer">
-            <div v-if="visibleAxisList.length" class="recommendation-table-wrapper">
-                <table class="recommendation-table">
-                    <!-- Axis group headers -->
-                    <thead>
-                        <tr class="axis-header-row">
+    <UiBox :title="$t('autotuneGainTitle')">
+        <div v-if="visibleAxisList.length" class="overflow-x-auto mb-3">
+            <table class="autotune-table w-full">
+                <!-- Axis group headers -->
+                <thead>
+                    <tr>
+                        <th></th>
+                        <th></th>
+                        <th
+                            v-for="axis in visibleAxisList"
+                            :key="axis.key"
+                            :style="{ color: axis.color }"
+                            class="!text-[13px] !border-b-2 !border-[var(--surface-300)]"
+                        >
+                            {{ axis.label }}
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <template v-for="row in tableRows" :key="row.key">
+                        <!-- Spacer + column sub-headers before the sliders section -->
+                        <tr v-if="row.columnHeaders">
+                            <td :colspan="2 + visibleAxisList.length" class="!h-3 !p-0 !border-none"></td>
+                        </tr>
+                        <tr v-if="row.columnHeaders" class="column-header-row">
                             <th></th>
-                            <th></th>
-                            <th
-                                v-for="axis in visibleAxisList"
-                                :key="axis.key"
-                                :style="{ color: axis.color }"
-                                class="axis-group-header"
-                            >
-                                {{ axis.label }}
+                            <th>{{ $t("autotuneCurrent") }}</th>
+                            <th v-for="axis in visibleAxisList" :key="axis.key">
+                                {{ $t("autotuneProposed") }}
                             </th>
                         </tr>
-                    </thead>
-                    <tbody>
-                        <template v-for="row in tableRows" :key="row.key">
-                            <!-- Spacer + column sub-headers before the sliders section -->
-                            <tr v-if="row.columnHeaders" class="spacer-row">
-                                <td :colspan="2 + visibleAxisList.length"></td>
-                            </tr>
-                            <tr v-if="row.columnHeaders" class="column-header-row">
-                                <th></th>
-                                <th>{{ $t("autotuneCurrent") }}</th>
-                                <th v-for="axis in visibleAxisList" :key="axis.key">
-                                    {{ $t("autotuneProposed") }}
-                                </th>
-                            </tr>
-                            <tr v-if="row.sectionTitle" class="section-title-row">
-                                <td :colspan="2 + visibleAxisList.length">{{ row.sectionTitle }}</td>
-                            </tr>
-                            <tr :class="{ 'section-divider': row.divider && !row.sectionTitle }">
-                                <td class="row-label">{{ row.label }}</td>
-                                <td class="value-current">{{ row.current }}</td>
-                                <td
-                                    v-for="axis in visibleAxisList"
-                                    :key="axis.key"
-                                    :class="changeClass(row.axes[axis.key]?.changePct)"
-                                >
-                                    <template v-if="row.axes[axis.key]">
-                                        {{ row.axes[axis.key].value }}
-                                        <span v-if="row.axes[axis.key].changePct != null" class="change-suffix">
-                                            ({{ formatChangePct(row.axes[axis.key].changePct) }})
-                                        </span>
-                                    </template>
-                                    <template v-else>--</template>
-                                </td>
-                            </tr>
-                        </template>
-                    </tbody>
-                </table>
-            </div>
-
-            <!-- Apply Button -->
-            <div class="apply-section">
-                <div class="default_btn apply-btn">
-                    <a href="#" :class="{ disabled: !isConnected || !visibleAxisList.length }" @click.prevent="onApply">
-                        {{ $t("autotuneApplyGains") }}
-                    </a>
-                </div>
-                <span v-if="!isConnected" class="apply-hint" v-html="$t('autotuneConnectRequired')"></span>
-                <span v-if="applied" class="apply-success" v-html="$t('autotuneApplied')"></span>
-            </div>
+                        <tr v-if="row.sectionTitle" class="section-title-row">
+                            <td :colspan="2 + visibleAxisList.length">{{ row.sectionTitle }}</td>
+                        </tr>
+                        <tr>
+                            <td class="font-bold text-dimmed">{{ row.label }}</td>
+                            <td class="text-dimmed">{{ row.current }}</td>
+                            <td
+                                v-for="axis in visibleAxisList"
+                                :key="axis.key"
+                                :class="changeClass(row.axes[axis.key]?.changePct)"
+                            >
+                                <template v-if="row.axes[axis.key]">
+                                    {{ row.axes[axis.key].value }}
+                                    <span v-if="row.axes[axis.key].changePct != null" class="text-[10px] opacity-80">
+                                        ({{ formatChangePct(row.axes[axis.key].changePct) }})
+                                    </span>
+                                </template>
+                                <template v-else>--</template>
+                            </td>
+                        </tr>
+                    </template>
+                </tbody>
+            </table>
         </div>
-    </div>
+
+        <!-- Apply Button -->
+        <div class="flex items-center gap-4">
+            <UButton @click="onApply" size="sm" :disabled="!isConnected || !visibleAxisList.length">
+                {{ $t("autotuneApplyGains") }}
+            </UButton>
+            <span v-if="!isConnected" class="text-sm text-dimmed" v-html="$t('autotuneConnectRequired')"></span>
+            <span v-if="applied" class="text-sm text-green-500 font-bold" v-html="$t('autotuneApplied')"></span>
+        </div>
+    </UiBox>
 </template>
 
 <script setup>
@@ -78,6 +71,7 @@ import { computed, ref } from "vue";
 import { useAutotuneStore } from "@/stores/autotune";
 import { useConnectionStore } from "@/stores/connection";
 import { useAutotune } from "@/composables/useAutotune";
+import UiBox from "../../elements/UiBox.vue";
 
 const store = useAutotuneStore();
 const connectionStore = useConnectionStore();
@@ -170,9 +164,9 @@ const tableRows = computed(() => {
 
 function changeClass(pct) {
     if (pct == null) return "";
-    if (pct > 5) return "change-increase";
-    if (pct < -5) return "change-decrease";
-    return "change-none";
+    if (pct > 5) return "text-green-500 font-bold";
+    if (pct < -5) return "text-red-500 font-bold";
+    return "text-dimmed";
 }
 
 function formatHz(v) {
@@ -205,123 +199,38 @@ async function onApply() {
 }
 </script>
 
-<style lang="less">
-.gain-recommendation {
-    .recommendation-table-wrapper {
-        overflow-x: auto;
-        margin-bottom: 12px;
+<style>
+.autotune-table {
+    border-collapse: collapse;
+
+    th,
+    td {
+        padding: 5px 10px;
+        text-align: left;
+        border-bottom: 1px solid var(--surface-200);
+        font-size: 12px;
     }
 
-    .recommendation-table {
-        width: 100%;
-        border-collapse: collapse;
-
-        th,
-        td {
-            padding: 5px 10px;
-            text-align: left;
-            border-bottom: 1px solid var(--surface-200);
-            font-size: 12px;
-        }
-
-        th {
-            font-weight: bold;
-            color: var(--surface-700);
-        }
-
-        .axis-group-header {
-            font-size: 13px;
-            font-weight: bold;
-            border-bottom: 2px solid var(--surface-300);
-        }
-
-        .row-label {
-            color: var(--surface-700);
-        }
-
-        .section-label {
-            font-weight: bold;
-        }
-
-        .spacer-row td {
-            height: 12px;
-            padding: 0;
-            border: none;
-        }
-
-        .column-header-row th {
-            font-weight: bold;
-            font-size: 11px;
-            color: var(--surface-700);
-            padding-top: 10px;
-            padding-bottom: 4px;
-            border-bottom: 1px solid var(--surface-300);
-        }
-
-        .section-title-row td {
-            font-weight: bold;
-            font-size: 11px;
-            color: var(--surface-500);
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            padding-top: 10px;
-            padding-bottom: 4px;
-            border-bottom: 1px solid var(--surface-300);
-        }
-
-        .section-divider td {
-            border-top: 2px solid var(--surface-300);
-        }
-
-        .value-current {
-            color: var(--surface-500);
-        }
-
-        .change-suffix {
-            font-size: 10px;
-            opacity: 0.8;
-        }
-
-        .change-increase {
-            color: #2ecc71;
-            font-weight: bold;
-        }
-        .change-decrease {
-            color: #e74c3c;
-            font-weight: bold;
-        }
-        .change-none {
-            color: var(--surface-600);
-        }
+    th {
+        font-weight: bold;
     }
+}
 
-    .apply-section {
-        display: flex;
-        align-items: center;
-        gap: 15px;
+.column-header-row th {
+    font-size: 11px;
+    padding-top: 10px;
+    padding-bottom: 4px;
+    border-bottom: 1px solid var(--surface-300);
+}
 
-        .apply-btn {
-            width: auto;
-            float: none;
-            display: inline-block;
-            min-width: 140px;
-
-            a {
-                padding-left: 12px;
-                padding-right: 12px;
-            }
-        }
-
-        .apply-hint {
-            font-size: 0.9em;
-            color: var(--surface-500);
-        }
-
-        .apply-success {
-            font-size: 0.9em;
-            color: #2ecc71;
-            font-weight: bold;
-        }
-    }
+.section-title-row td {
+    font-weight: bold;
+    font-size: 11px;
+    color: var(--surface-500);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding-top: 10px;
+    padding-bottom: 4px;
+    border-bottom: 1px solid var(--surface-300);
 }
 </style>

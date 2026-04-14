@@ -1,10 +1,6 @@
 <template>
     <BaseTab tab-name="autotune" @cleanup="onCleanup">
-        <div class="content_wrapper">
-            <div class="tab_title" v-html="$t('tabAutotune')"></div>
-
-            <div class="autotune-spacer"></div>
-
+        <div class="content_wrapper grid-box col1">
             <!-- Import Section (always visible) -->
             <AutotuneImport />
 
@@ -37,14 +33,3 @@ onUnmounted(() => {
     store.reset();
 });
 </script>
-
-<style lang="less">
-.tab-autotune {
-    .bode-plot,
-    .current-pids,
-    .gain-recommendation,
-    .autotune-import {
-        margin-bottom: 25px !important;
-    }
-}
-</style>

@@ -450,6 +450,7 @@
     "autotuneAxisPitch": { "message": "Pitch" },
     "autotuneAxisYaw": { "message": "Yaw" },
     "autotuneBodePlotTitle": { "message": "Frequency Response" },
+    "autotuneCurrentPidsTitle": { "message": "Current PIDs (from log)" },
     "tabReceiver": {
         "message": "Receiver"
     },

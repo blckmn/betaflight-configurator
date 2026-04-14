@@ -1,34 +1,36 @@
 <template>
-    <div class="gui_box bode-plot">
-        <div class="gui_box_titlebar">
-            <div class="spacer_box_title" v-html="$t('autotuneBodePlotTitle')"></div>
+    <UiBox :title="$t('autotuneBodePlotTitle')">
+        <!-- Axis checkboxes — centred -->
+        <div class="flex justify-center gap-5">
+            <label
+                v-for="axis in AXES"
+                :key="axis.key"
+                class="flex items-center gap-1.5 cursor-pointer font-bold text-xs"
+                :style="{ color: AXIS_COLORS[axis.key] }"
+            >
+                <input
+                    type="checkbox"
+                    class="cursor-pointer accent-current"
+                    :checked="store.visibleAxes[axis.key]"
+                    :disabled="!hasAxis(axis.key)"
+                    @change="toggleAxis(axis.key, $event)"
+                />
+                {{ $t(axis.labelKey) }}
+            </label>
         </div>
-        <div class="spacer">
-            <!-- Axis checkboxes — centred -->
-            <div class="axis-toggles">
-                <label v-for="axis in AXES" :key="axis.key" class="axis-toggle" :class="axis.colorClass">
-                    <input
-                        type="checkbox"
-                        :checked="store.visibleAxes[axis.key]"
-                        :disabled="!hasAxis(axis.key)"
-                        @change="toggleAxis(axis.key, $event)"
-                    />
-                    {{ $t(axis.labelKey) }}
-                </label>
-            </div>
 
-            <!-- Full-width overlaid charts -->
-            <div ref="plotContainer" class="bode-container">
-                <svg ref="magnitudeSvg" class="bode-svg"></svg>
-                <svg ref="phaseSvg" class="bode-svg"></svg>
-            </div>
+        <!-- Full-width overlaid charts -->
+        <div ref="plotContainer" class="w-full">
+            <svg ref="magnitudeSvg" class="bode-svg block w-full"></svg>
+            <svg ref="phaseSvg" class="bode-svg block w-full"></svg>
         </div>
-    </div>
+    </UiBox>
 </template>
 
 <script setup>
 import { ref, watch, onMounted, onUnmounted, nextTick } from "vue";
 import { useAutotuneStore } from "@/stores/autotune";
+import UiBox from "../../elements/UiBox.vue";
 import * as d3 from "d3";
 
 const store = useAutotuneStore();
@@ -323,57 +325,18 @@ function drawCoherenceShading(g, points, xScale, height) {
 }
 </script>
 
-<style lang="less">
-.bode-plot {
-    .axis-toggles {
-        display: flex;
-        justify-content: center;
-        gap: 20px;
-        margin-bottom: 10px;
+<style>
+.bode-svg {
+    text {
+        fill: var(--surface-700);
     }
-
-    .axis-toggle {
-        display: flex;
-        align-items: center;
-        gap: 5px;
-        cursor: pointer;
-        font-weight: bold;
-        font-size: 12px;
-
-        input[type="checkbox"] {
-            cursor: pointer;
-        }
-
-        &.toggle-roll {
-            color: #e74c3c;
-        }
-        &.toggle-pitch {
-            color: #2ecc71;
-        }
-        &.toggle-yaw {
-            color: #3498db;
-        }
+    .tick text {
+        font-size: 10px;
+        fill: var(--surface-600);
     }
-
-    .bode-container {
-        width: 100%;
-    }
-
-    .bode-svg {
-        display: block;
-        width: 100%;
-
-        text {
-            fill: var(--surface-700);
-        }
-        .tick text {
-            font-size: 10px;
-            fill: var(--surface-600);
-        }
-        .tick line,
-        .domain {
-            stroke: var(--surface-400);
-        }
+    .tick line,
+    .domain {
+        stroke: var(--surface-400);
     }
 }
 </style>

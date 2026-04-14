@@ -1,36 +1,32 @@
 <template>
-    <div class="gui_box current-pids">
-        <div class="gui_box_titlebar">
-            <div class="spacer_box_title">Current PIDs (from log)</div>
-        </div>
-        <div class="spacer">
-            <table v-if="rows.length" class="pids-table">
-                <thead>
-                    <tr>
-                        <th></th>
-                        <th></th>
-                        <th v-for="axis in availableAxes" :key="axis.key" :style="{ color: axis.color }">
-                            {{ axis.label }}
-                        </th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr v-for="row in rows" :key="row.key">
-                        <td class="row-label">{{ row.label }}</td>
-                        <td></td>
-                        <td v-for="axis in availableAxes" :key="axis.key">
-                            {{ row.values[axis.key] ?? "--" }}
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-    </div>
+    <UiBox :title="$t('autotuneCurrentPidsTitle')">
+        <table v-if="rows.length" class="autotune-table">
+            <thead>
+                <tr>
+                    <th></th>
+                    <th></th>
+                    <th v-for="axis in availableAxes" :key="axis.key" :style="{ color: axis.color }">
+                        {{ axis.label }}
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr v-for="row in rows" :key="row.key">
+                    <td class="font-bold text-dimmed">{{ row.label }}</td>
+                    <td></td>
+                    <td v-for="axis in availableAxes" :key="axis.key">
+                        {{ row.values[axis.key] ?? "--" }}
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </UiBox>
 </template>
 
 <script setup>
 import { computed } from "vue";
 import { useAutotuneStore } from "@/stores/autotune";
+import UiBox from "../../elements/UiBox.vue";
 
 const store = useAutotuneStore();
 
@@ -68,27 +64,20 @@ const rows = computed(() => {
 });
 </script>
 
-<style lang="less">
-.current-pids {
-    .pids-table {
-        border-collapse: collapse;
+<style>
+.autotune-table {
+    border-collapse: collapse;
 
-        th,
-        td {
-            padding: 5px 16px;
-            text-align: left;
-            border-bottom: 1px solid var(--surface-200);
-            font-size: 12px;
-        }
+    th,
+    td {
+        padding: 5px 16px;
+        text-align: left;
+        border-bottom: 1px solid var(--surface-200);
+        font-size: 12px;
+    }
 
-        th {
-            font-weight: bold;
-        }
-
-        .row-label {
-            font-weight: bold;
-            color: var(--surface-700);
-        }
+    th {
+        font-weight: bold;
     }
 }
 </style>
